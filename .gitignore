@@ -1,9 +1,11 @@
 *~
 \#~
 *.class
+*.zip
+.DS_Store
+
+# CIS351
 munit.jar
 Mars.jar
 Mars4_5.jar
 DLUnit.jar
-.DS_Store
-*.zip
