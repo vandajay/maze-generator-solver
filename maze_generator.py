@@ -3,10 +3,22 @@ import argparse
 
 def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 	""" Create walls algorithmically to fit within the maze"""
-	# TODO: You will likely want to insert logic to make sure generated walls do not interfere with your start.
-
+	# # TODO: You will likely want to insert logic to make sure generated walls do not interfere with your start.
+	list = []
+	for i in range(height):
+		for j in range(width):
+			if i == start_x and j == start_y:
+				continue
+			# elif i == goal_x and j == goal_y:
+			# 	continue
+			elif i == goal_x and j == goal_y:
+				continue
+			else:
+				r = random.randint(1,5)
+				if r == 2:
+					list.append(tuple((i,j)))
 	# Return the created walls as a list of tuples.  Each tuple is an (x,y) coordinate.
-	return [ (1, 0),(1, 1),(1, 2),(2, 1),(2, 2),(2, 3),(2, 4),(2, 5),(3, 5),(4, 5),(5, 5),(6, 5),(7, 5),(8, 5)]
+	return list
 
 def check_positive(value):
 	""" Source: https://stackoverflow.com/questions/14117415/in-python-using-argparse-allow-only-positive-integers """
