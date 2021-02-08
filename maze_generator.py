@@ -9,8 +9,8 @@ def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 		for j in range(width):
 			if i == start_x and j == start_y:
 				continue
-			# elif i == goal_x and j == goal_y:
-			# 	continue
+			elif i == goal_x and j == goal_y:
+				continue
 			elif i == goal_x and j == goal_y:
 				continue
 			else:
