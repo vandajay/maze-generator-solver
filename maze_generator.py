@@ -1,5 +1,7 @@
 """ Generate a maze file """
 import argparse
+import random
+
 
 def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 	""" Create walls algorithmically to fit within the maze"""
@@ -9,12 +11,16 @@ def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 		for j in range(width):
 			if i == start_x and j == start_y:
 				continue
-			elif i == goal_x -1 and j == goal_y - 1:
-				continue
+			elif i == start_x + 1 or j == start_y + 1:
+				j = j + 1
+			elif i == start_x - 1 or j == start_y - 1:
+				j = j + 1
+			elif i == goal_x - 1 and j == goal_y - 1:
+				j = j + 1
 			elif i == goal_x and j == goal_y:
 				continue
 			else:
-				r = random.randint(1,5)
+				r = random.randint(1,4)
 				if r == 2:
 					list.append(tuple((i,j)))
 	# Return the created walls as a list of tuples.  Each tuple is an (x,y) coordinate.
@@ -28,12 +34,12 @@ def check_positive(value):
 	return ivalue
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--start_x", type=check_positive, default=0, help="x location for the player start.")
-parser.add_argument("--start_y", type=check_positive, default=0, help="y location for the player start.")
-parser.add_argument("--goal_x", type=check_positive, default=9, help="x location for the goal.")
-parser.add_argument("--goal_y", type=check_positive, default=9, help="y location for the goal.")
-parser.add_argument("--width", type=check_positive, default=10, help="width of the maze.")
-parser.add_argument("--height", type=check_positive, default=10, help="height of the maze.")
+parser.add_argument("--start_x", type=check_positive, default=random.randint(1, 79), help="x location for the player start.")
+parser.add_argument("--start_y", type=check_positive, default=random.randint(1, 79), help="y location for the player start.")
+parser.add_argument("--goal_x", type=check_positive, default=random.randint(10, 99), help="x location for the goal.")
+parser.add_argument("--goal_y", type=check_positive, default=random.randint(10, 99), help="y location for the goal.")
+parser.add_argument("--width", type=check_positive, default=100, help="width of the maze.")
+parser.add_argument("--height", type=check_positive, default=100, help="height of the maze.")
 parser.add_argument("--output_file", type=str, default="demo_maze_generator.dat", help="Maze output file name.")
 args = parser.parse_args()
 
@@ -65,4 +71,4 @@ with open("./Worlds/{}".format(args.output_file),"w") as f:
 	for w in walls:
 		f.write("{},{}\n".format(w[0],w[1]))
 	f.write("specials\n")
-	f.write("{}, {}, green, 1, False\n".format(args.goal_x, args.goal_y))
+	f.write("{}, {}, red, 1, False\n".format(args.goal_x, args.goal_y))
