@@ -43,7 +43,7 @@ class World(object):
 
     def check_finish_node(self, location):
         """ Check if the provided location tuple is a finish node. """
-        return [location[0], location[1], "green", 1, False] in self.world_spec.specials
+        return [location[0], location[1], "red", 1, False] in self.world_spec.specials
 
     def check_valid_move_cell(self, location):
         """ Check if the provided location tuple is a valid cell to move to. """

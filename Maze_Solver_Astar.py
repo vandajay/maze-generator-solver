@@ -5,12 +5,6 @@ import random
 import threading
 import time
 
-class Node():
-    def __init__(self, parent=None, position=None):
-        self.parent = parent
-        self.p
-
-
 class MazeSolver(object): 
     def __init__(self,world):
         self.world = world
@@ -23,7 +17,6 @@ class MazeSolver(object):
         self.astar_open_queue = []
         self.astar_closed_queue = []
 
-
     def astar_search(self):
         # initialize f,g,h
         self.f[self.world.player] = 0
@@ -35,29 +28,26 @@ class MazeSolver(object):
         self.astar_open_queue.append(self.world.player)
 
         # set color as visited
-        self.world.set_cell_discovered(self.world.player)
+        self.world.set_cell_visited(self.world.player)
 
-        # run loop until end is reached
+        # run loop until goal is reached
         while len(self.astar_open_queue) > 0:
             node = self.astar_open_queue[0]
             index = 0
 
-            self.world.set_cell_discovered(node)
             for i, n in enumerate(self.astar_open_queue):
+                # check for wall
                 if self.world.check_valid_move_cell(n) and n not in self.astar_discovered:
+                    self.astar_discovered[n] = node
                     self.world.set_cell_discovered(node)
-                    if self.f[n] < self.f[node]: 
+                    if self.f[n] < self.f[node]:
                         node = n # set current node to best position
                         index = i
+                        if self.world.check_finish_node(node):
+                            return node # found ending node
 
-                
-
-            self.astar_open_queue.pop(index)
             self.astar_closed_queue.append(node) # lock in node
-            # self.world.set_cell_discovered(node) # set color
-
-            if self.world.check_finish_node(node):
-                return node # found ending node
+            self.world.set_cell_visited_twice(self.astar_open_queue.pop(index)) # set color
 
             children = []
             for n in [(node[0]-1, node[1]), (node[0]+1, node[1]), (node[0], node[1]-1), (node[0], node[1]+1)]:
@@ -77,7 +67,7 @@ class MazeSolver(object):
                 # g distance from start
                 self.g[c] = self.g[node] + 1 
 
-                # h estimated distance from end pythagorean theorem
+                # h estimated distance from goal with pythagorean theorem
                 self.h[c] = ((c[0] - self.world.world_spec.specials[0][0]) ** 2) + ((c[1] - self.world.world_spec.specials[0][1]) ** 2)
 
                 # the f = g + h for child
@@ -88,9 +78,9 @@ class MazeSolver(object):
                         continue
 
                 self.astar_open_queue.append(c)
-                time.sleep(0.025)
+                # time.sleep(0.01)
 
-            self.world.set_cell_visited(node)
+            # self.world.set_cell_visited(node)
 
     def astar_path(self, goal):
         """ Construct the path to traverse the maze. 
@@ -100,8 +90,8 @@ class MazeSolver(object):
         """
         path = [goal]
 
-        while self.astar_closed_queue[path[-1]] != 'root': # -1 index reads from end of list
-            path.append(self.astar_closed_queue[path[-1]])
+        while self.astar_discovered[path[-1]] != 'root': # -1 index reads from end of list
+            path.append(self.astar_discovered[path[-1]])
 
         path.reverse()
         return path
@@ -174,7 +164,7 @@ class MazeSolver(object):
 
 # Get command line arguments needed for the algorithm.
 parser = argparse.ArgumentParser()
-parser.add_argument("--world_file", type=str, default="world_enhanced.dat", help="World file in the worlds folder to use.")
+parser.add_argument("--world_file", type=str, default="demo_maze_generator.dat", help="World file in the worlds folder to use.")
 args = parser.parse_args()
 
 # Create a world to render the maze visually and allow 
