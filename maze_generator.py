@@ -1,5 +1,7 @@
 """ Generate a maze file """
 import argparse
+import random
+
 
 def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 	""" Create walls algorithmically to fit within the maze"""
@@ -9,12 +11,16 @@ def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 		for j in range(width):
 			if i == start_x and j == start_y:
 				continue
-			elif i == goal_x -1 and j == goal_y - 1:
+			elif i == start_x + 1 or j == start_y + 1:
+				continue
+			elif i == goal_x - 1 and j == goal_y - 1:
 				continue
 			elif i == goal_x and j == goal_y:
 				continue
+			elif j == width - 1:
+				continue
 			else:
-				r = random.randint(1,5)
+				r = random.randint(1,3)
 				if r == 2:
 					list.append(tuple((i,j)))
 	# Return the created walls as a list of tuples.  Each tuple is an (x,y) coordinate.
