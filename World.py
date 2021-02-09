@@ -65,6 +65,14 @@ class World(object):
         """
         self.board.itemconfig(self.grid_cells[location], fill='sky blue')     
 
+    def set_cell_visited_twice(self, location):
+        """ Set the color of the cell to one denoting that it has been discovered.  Helps visualize the search. 
+
+        Args:
+            location: tuple of (x,y) coordinate.
+        """
+        self.board.itemconfig(self.grid_cells[location], fill='light blue') 
+
     def set_cell_traversed(self, location):
         """ Set the color of the cell to one denoting that it has been discovered.  Helps visualize the search. 
 
