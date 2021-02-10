@@ -6,22 +6,30 @@ import random
 def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 	""" Create walls algorithmically to fit within the maze"""
 	# # TODO: You will likely want to insert logic to make sure generated walls do not interfere with your start.
+	#create empty list that will return the list of tuples.
 	list = []
+
+	#nested for loop to go through the height and width of the grid to create the walls
 	for i in range(height):
 		for j in range(width):
-			if i == start_x and j == start_y:
-				continue
+			#conditions that prevent the wall generator from generating a wall on the start/end as well as walls right
+			#next to it as to prevent an unsolvable maze
+			if i == start_x or j == start_y:
+				j = j + 1
 			elif i == start_x + 1 or j == start_y + 1:
 				j = j + 1
 			elif i == start_x - 1 or j == start_y - 1:
 				j = j + 1
 			elif i == goal_x - 1 and j == goal_y - 1:
 				j = j + 1
-			elif i == goal_x and j == goal_y:
-				continue
+			elif i == goal_x or j == goal_y:
+				j = j + 1
 			else:
+				#after checking conditions a random int is generated with a 25% chance of creating a wall at position
+				# [i][j]
 				r = random.randint(1,4)
 				if r == 2:
+				#if r hits a 2 generate wall and add the coordinate as a tuple to the list
 					list.append(tuple((i,j)))
 	# Return the created walls as a list of tuples.  Each tuple is an (x,y) coordinate.
 	return list
