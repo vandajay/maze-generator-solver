@@ -13,17 +13,43 @@ def create_walls(width, height, start_x, start_y, goal_x, goal_y):
 	for i in range(height):
 		for j in range(width):
 			#conditions that prevent the wall generator from generating a wall on the start/end as well as walls right
-			#next to it as to prevent an unsolvable maze
-			if i == start_x or j == start_y:
-				j = j + 1
-			elif i == start_x + 1 or j == start_y + 1:
-				j = j + 1
-			elif i == start_x - 1 or j == start_y - 1:
-				j = j + 1
+			#next to it to prevent an unsolvable maze
+			if i == start_x and j == start_y:
+				continue
+			elif i == start_x - 1 and j == start_y:
+				continue
+			elif i == start_x + 1 and j == start_y:
+				continue
+			elif i == start_x and j == start_y + 1:
+				continue
+			elif i == start_x and j == start_y - 1:
+				continue
+			elif i == start_x + 1 and j == start_y - 1:
+				continue
+			elif i == start_x - 1 and j == start_y - 1:
+				continue
+			elif i == start_x + 1 and j == start_y + 1:
+				continue
+			elif i == start_x - 1 and j == start_y + 1:
+				continue
+			elif i == goal_x and j == goal_y:
+				continue
+			elif i == goal_x - 1 and j == goal_y:
+				continue
+			elif i == goal_y + 1 and j == goal_y:
+				continue
+			elif i == goal_x and j == goal_y + 1:
+				continue
+			elif i == goal_x and j == goal_y - 1:
+				continue
+			elif i == goal_x + 1 and j == goal_y - 1:
+				continue
 			elif i == goal_x - 1 and j == goal_y - 1:
-				j = j + 1
-			elif i == goal_x or j == goal_y:
-				j = j + 1
+				continue
+			elif i == goal_x + 1 and j == goal_y + 1:
+				continue
+			elif i == goal_x - 1 and j == goal_y + 1:
+				continue
 			else:
 				#after checking conditions a random int is generated with a 25% chance of creating a wall at position
 				# [i][j]
