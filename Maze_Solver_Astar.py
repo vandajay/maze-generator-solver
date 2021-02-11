@@ -23,6 +23,10 @@ class MazeSolver(object):
         self.astar_open_queue = []
         self.astar_closed_queue = []
 
+        self.visited_twice = {}
+        # self.visited_thrice = []
+
+
     def astar_search(self):
         start_node = Node(None, self.world.player)
         start_node.g = start_node.h = start_node.f = 0
@@ -41,7 +45,12 @@ class MazeSolver(object):
             current_node = self.astar_open_queue[0] # node is current position
             index = 0
             self.world.set_cell_visited_twice(current_node.position)
+            # self.visited_twice[current_node.position] += 1
+
             for i, move in enumerate(self.astar_open_queue):
+                # if node visited more than once skip it
+                if move.position in self.visited_twice and self.visited_twice[move.position] > 1:
+                    continue
                 if move.f < current_node.f:
                     current_node = move # set current node to best position
                     index = i
@@ -85,8 +94,14 @@ class MazeSolver(object):
                     found_node = self.astar_open_queue[self.astar_open_queue.index(child)]
                     if child.g > found_node.g:
                         continue
-                except ValueError:  # not in open_nodes
+                except ValueError: # not in open_nodes
                     pass
+
+                # node visit tracking
+                if child.position not in self.visited_twice:
+                    self.visited_twice[child.position] = 0
+                elif child in self.astar_open_queue:
+                    self.visited_twice[child.position] += 1
 
                 self.astar_open_queue.append(child)
                 self.world.set_cell_visited(child.position)
@@ -171,7 +186,7 @@ class MazeSolver(object):
                     t = 1.0
 
                 # MODIFY THIS SLEEP IF THE GAME IS GOING TOO FAST.
-                time.sleep(0.01)
+                time.sleep(0.005)
 
 # Get command line arguments needed for the algorithm.
 parser = argparse.ArgumentParser()
