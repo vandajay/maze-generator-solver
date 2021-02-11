@@ -59,7 +59,7 @@ class MazeSolver(object):
                 (current_node.position[0], current_node.position[1]-1),
                 (current_node.position[0], current_node.position[1]+1)
                 ]:
-                    if not self.world.check_valid_move_cell(new_pos):
+                    if not self.world.check_valid_move_cell(new_pos) or self.astar_open_queue:
                         continue # skip invalid child/position
 
                     new_node = Node(current_node, new_pos)
@@ -80,9 +80,13 @@ class MazeSolver(object):
                 # calculate f value
                 child.f = child.g + child.h
 
-                for open_node in self.astar_open_queue: # grab best f value of open moves
-                    if child == open_node and child.g > open_node.g:
+                # if if child is already in open moves, check if child has better pathing (lower g) skip otherwise
+                try: 
+                    found_node = self.astar_open_queue[self.astar_open_queue.index(child)]
+                    if child.g > found_node.g:
                         continue
+                except ValueError:  # not in open_nodes
+                    pass
 
                 self.astar_open_queue.append(child)
                 self.world.set_cell_visited(child.position)
