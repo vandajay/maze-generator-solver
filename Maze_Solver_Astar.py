@@ -59,7 +59,7 @@ class MazeSolver(object):
                 (current_node.position[0], current_node.position[1]-1),
                 (current_node.position[0], current_node.position[1]+1)
                 ]:
-                    if not self.world.check_valid_move_cell(new_pos) or self.astar_open_queue:
+                    if not self.world.check_valid_move_cell(new_pos):
                         continue # skip invalid child/position
 
                     new_node = Node(current_node, new_pos)
