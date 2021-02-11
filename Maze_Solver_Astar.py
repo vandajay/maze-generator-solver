@@ -5,82 +5,87 @@ import random
 import threading
 import time
 
-class MazeSolver(object): 
+class Node():
+    def __init__(self, parent=None, position=None):
+        self.parent = parent
+        self.position = position
+
+        self.g = 0
+        self.h = 0
+        self.f = 0
+
+    def __eq__(self, other): # for comparing to other node objects with '==' op
+        return self.position == other.position
+
+class MazeSolver(object):
     def __init__(self,world):
         self.world = world
-
-        self.f = {}
-        self.g = {}
-        self.h = {}
-
-        self.astar_discovered = {}
         self.astar_open_queue = []
         self.astar_closed_queue = []
 
     def astar_search(self):
-        # initialize f,g,h
-        self.f[self.world.player] = 0
-        self.g[self.world.player] = 0
-        self.h[self.world.player] = 0
-        
-        # add starting pos to open list, set as discovered
-        self.astar_discovered[self.world.player] = 'root'
-        self.astar_open_queue.append(self.world.player)
+        start_node = Node(None, self.world.player)
+        start_node.g = start_node.h = start_node.f = 0
+        goal_node = Node(None, (self.world.world_spec.specials[0][0], self.world.world_spec.specials[0][1]))
+        goal_node.g = goal_node.h = goal_node.f = 0
 
-        # set color as visited
-        self.world.set_cell_visited(self.world.player)
+        # add starting pos to open list of moves
+        self.astar_open_queue.append(start_node)
 
-        # run loop until goal is reached
+        # set color
+        self.world.set_cell_discovered(start_node.position)
+
+        # run loop until goal node is reached
         while len(self.astar_open_queue) > 0:
-            node = self.astar_open_queue[0]
+            # time.sleep(0.2)
+            current_node = self.astar_open_queue[0] # node is current position
             index = 0
+            self.world.set_cell_visited_twice(current_node.position)
+            for i, move in enumerate(self.astar_open_queue):
+                if move.f < current_node.f:
+                    current_node = move # set current node to best position
+                    index = i
+                    if self.world.check_finish_node(current_node.position):
+                        return current_node # found goal
 
-            for i, n in enumerate(self.astar_open_queue):
-                # check for wall
-                if self.world.check_valid_move_cell(n) and n not in self.astar_discovered:
-                    self.astar_discovered[n] = node
-                    self.world.set_cell_discovered(node)
-                    if self.f[n] < self.f[node]:
-                        node = n # set current node to best position
-                        index = i
-                        if self.world.check_finish_node(node):
-                            return node # found ending node
-
-            self.astar_closed_queue.append(node) # lock in node
-            self.world.set_cell_visited_twice(self.astar_open_queue.pop(index)) # set color
+            self.astar_closed_queue.append(current_node) # add node to path
+             # pop out open move after moving into closed moves
+            self.astar_open_queue.pop(index)
 
             children = []
-            for n in [(node[0]-1, node[1]), (node[0]+1, node[1]), (node[0], node[1]-1), (node[0], node[1]+1)]:
+            for new_pos in [
+                (current_node.position[0]-1, current_node.position[1]),
+                (current_node.position[0]+1, current_node.position[1]),
+                (current_node.position[0], current_node.position[1]-1),
+                (current_node.position[0], current_node.position[1]+1)
+                ]:
+                    if not self.world.check_valid_move_cell(new_pos):
+                        continue # skip invalid child/position
 
-                # check range
-                if n[0] > (self.world.world_spec.x_width - 1) or n[0] < 0 or n[1] > (self.world.world_spec.y_width - 1) or n[1] < 0:
-                    continue # jumps back to for loop
-                if not self.world.check_valid_move_cell(n):
-                    continue
-                children.append(n)
+                    new_node = Node(current_node, new_pos)
+                    children.append(new_node)
+                    self.world.set_cell_discovered(new_pos)
 
-            for c in children:
-                for j in self.astar_closed_queue:
-                    if c == j:
+            for child in children:
+                for closed_child in self.astar_closed_queue:
+                    if child == closed_child:
                         continue
 
                 # g distance from start
-                self.g[c] = self.g[node] + 1 
+                child.g = current_node.g + 1 
 
-                # h estimated distance from goal with pythagorean theorem
-                self.h[c] = ((c[0] - self.world.world_spec.specials[0][0]) ** 2) + ((c[1] - self.world.world_spec.specials[0][1]) ** 2)
+                # h estimated distance from goal with pythagorean theorem shorthand
+                child.h = ((child.position[0] - goal_node.position[0]) ** 2) + ((child.position[1] - goal_node.position[1]) ** 2)
 
-                # the f = g + h for child
-                self.f[c] = self.g[c] + self.h[c]
+                # calculate f value
+                child.f = child.g + child.h
 
-                for k in self.astar_open_queue: # compare
-                    if c == k and self.g[c] > self.g[k]:
+                for open_node in self.astar_open_queue: # grab best f value of open moves
+                    if child == open_node and child.g > open_node.g:
                         continue
 
-                self.astar_open_queue.append(c)
-                # time.sleep(0.01)
-
-            # self.world.set_cell_visited(node)
+                self.astar_open_queue.append(child)
+                self.world.set_cell_visited(child.position)
 
     def astar_path(self, goal):
         """ Construct the path to traverse the maze. 
@@ -88,13 +93,15 @@ class MazeSolver(object):
         Args:
             end: the ending cell to start the backwards path through.
         """
-        path = [goal]
+        if goal.position == (self.world.world_spec.specials[0][0], self.world.world_spec.specials[0][1]):
+            path = []
+            current = goal
 
-        while self.astar_discovered[path[-1]] != 'root': # -1 index reads from end of list
-            path.append(self.astar_discovered[path[-1]])
-
-        path.reverse()
-        return path
+            while current is not None: # None meaning no parent aka start
+                path.append(current.position)
+                current = current.parent
+            
+            return path[::-1] # reverse path
 
     def do_action(self,action):
         s = self.world.player
@@ -124,7 +131,7 @@ class MazeSolver(object):
         print("Path is: ", end="")
         print(path)
 
-        # Execute the BFS path repeatedly.
+        # Execute the path repeatedly.
         while True:
             for i in range(len(path)-1):
                 # Find which direction the player should move.
@@ -160,7 +167,7 @@ class MazeSolver(object):
                     t = 1.0
 
                 # MODIFY THIS SLEEP IF THE GAME IS GOING TOO FAST.
-                time.sleep(0.1)
+                time.sleep(0.01)
 
 # Get command line arguments needed for the algorithm.
 parser = argparse.ArgumentParser()
